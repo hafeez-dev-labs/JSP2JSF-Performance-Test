@@ -25,7 +25,7 @@ Deploy `target/jsp2jsf-performance-test.war` to a Jakarta EE 10-compatible runti
 
 ## Performance story
 
-The repository deliberately does **not** invent a 75% result. Run the benchmark under controlled, identical conditions and record the actual measurements in `performance/benchmark.md`. If the measured result is approximately 75%, the resume claim can credibly use that figure; otherwise use the measured result.
+Run the benchmark under controlled, identical conditions and record the measured results in `performance/benchmark.md`.
 
 ## Portfolio framing
 

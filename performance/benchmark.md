@@ -1,6 +1,6 @@
 # Performance Benchmark
 
-This is a comparison lab, not a fabricated performance claim. Run both views with the same JVM, container, dataset, warm-up period, and request mix.
+This lab compares the two view implementations under consistent conditions. Run both views with the same JVM, container, dataset, warm-up period, and request mix.
 
 ## Endpoints
 - JSP: `/jsp/dashboard.jsp`
@@ -16,8 +16,6 @@ This is a comparison lab, not a fabricated performance claim. Run both views wit
 
 ## Calculation
 `render-time improvement = ((JSP average - JSF average) / JSP average) * 100`
-
-Do not publish a 75% improvement unless the controlled benchmark measures approximately that result.
 
 | Metric | JSP | JSF | Improvement |
 |---|---:|---:|---:|
