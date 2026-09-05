@@ -1,0 +1,6 @@
+<!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="jakarta.faces.html"><h:head><title>JSF Dashboard</title><h:outputStylesheet library="assets" name="dashboard.css" /></h:head><h:body><main>
+<header><h1>JSF Dashboard</h1><p>Component-based server-rendered implementation</p></header>
+<section class="cards"><article><span>Open tickets</span><strong>#{dashboard.data.openTickets}</strong></article><article><span>Completed</span><strong>#{dashboard.data.completedTickets}</strong></article><article><span>Active users</span><strong>#{dashboard.data.activeUsers}</strong></article></section>
+<section class="panel"><h2>Recent activity</h2><h:dataTable value="#{dashboard.data.activities}" var="item"><h:column><h:outputText value="#{item.time}" /></h:column><h:column><h:outputText value="#{item.message}" /></h:column><h:column><h:outputText value="#{item.status}" /></h:column></h:dataTable></section>
+<section class="panel"><h2>Reports</h2><h:dataTable value="#{dashboard.data.reports}" var="row"><h:column><h:outputText value="#{row.name}" /></h:column><h:column><h:outputText value="#{row.requests}" /></h:column><h:column><h:outputText value="#{row.trend}" /></h:column></h:dataTable></section>
+</main></h:body></html>
