@@ -1,32 +1,66 @@
 # Performance Benchmark
 
-This lab compares the two view implementations under consistent conditions. Run both views with the same JVM, container, dataset, warm-up period, and request mix.
+This lab compares the JSP and JSF view implementations under consistent, repeatable conditions. Measurements must be collected from the same deployed application/runtime with the same dataset and request mix.
+
+## Controlled variables
+
+Use the same values for JSP and JSF:
+
+| Variable | Required control |
+| --- | --- |
+| Java/JVM | Same Java major/minor version and JVM vendor |
+| Jakarta runtime | Same application server/container and configuration |
+| Application build | Same WAR build |
+| Dataset | Same application data |
+| Endpoint mix | Same JSP/JSF request mix |
+| Warm-up | 100 requests per implementation |
+| Measured requests | 1,000 requests per implementation per run |
+| Concurrency | Same configured concurrency |
+| Runs | 3 repeated runs |
+| Environment | Same host/container resources and network path |
+
+Document any deviation before interpreting the results.
+
+## Benchmark runner
+
+The Python benchmark runner in performance/benchmark.py sends the same warm-up and measured request pattern to both implementations. It calculates average latency, P95, P99, maximum latency, throughput, and error rate for each run, then writes raw samples and a JSON summary.
+
+Example:
+
+~~~text
+python performance/benchmark.py --base-url http://localhost:8080/jsp2jsf-performance-test
+~~~
+
+For a different concurrency level:
+
+~~~text
+python performance/benchmark.py --base-url http://localhost:8080/jsp2jsf-performance-test --concurrency 4
+~~~
+
+The runner writes performance/results/raw.csv and performance/results/summary.json.
+
+## Collection procedure
+
+1. Build with mvn clean package.
+2. Deploy the WAR to a Jakarta-compatible runtime.
+3. Record the Java/JVM version and runtime/container version.
+4. Confirm the same application build and dataset are used for both implementations.
+5. Start the application and allow it to reach a stable state.
+6. Warm the JSP endpoint with 100 requests.
+7. Run the measured JSP load for 1,000 requests at the selected concurrency.
+8. Repeat for three runs.
+9. Warm and measure the JSF endpoint using the same values.
+10. Review the raw CSV for failed requests or anomalous runs.
+11. Compare the three-run medians rather than relying on a single run.
+12. Record actual measured values in the results table below.
 
 ## Instrumentation definitions
 
-- Server duration: elapsed wall-clock time measured by the servlet filter around the complete JSP/JSF request, including view rendering and response generation handled by the application.
-- Server-Timing: the same server duration is exposed as the HTTP Server-Timing response header so browser developer tools can distinguish application time from total browser-observed timing.
-- Request count: number of instrumented requests for the selected implementation.
-- Error count: instrumented requests that terminate with an IOException, ServletException, or runtime exception.
-- Total duration: sum of server durations across instrumented requests.
-- Max duration: slowest instrumented request observed by the in-memory collector.
-- Average duration: total duration / request count.
-- Client/browser timing: measure separately with browser DevTools or an external HTTP client. It includes network and browser overhead and must not be treated as equivalent to server duration.
-
-## Local metrics
-
-After exercising the JSP and JSF endpoints, inspect /metrics. The endpoint reports aggregate in-memory counters for jsp and jsf. Restarting the application resets these counters.
-
-## Baseline collection procedure
-
-1. Build with mvn clean package.
-2. Deploy the WAR to the same Jakarta-compatible runtime for both implementations.
-3. Use the same dataset and request mix.
-4. Warm each endpoint with 100 requests.
-5. Measure at least 1,000 requests per implementation.
-6. Record server duration from the instrumentation and client timing separately.
-7. Repeat three runs and compare medians.
-8. Record the actual values below only after measurement.
+- Server duration: elapsed wall-clock time measured by the servlet filter around the JSP/JSF request.
+- Server-Timing: the same server duration exposed as an HTTP response header.
+- Client/browser timing: separate browser or external-client measurement that includes network and browser overhead.
+- Error rate: failed requests divided by measured requests.
+- Throughput: measured requests completed divided by wall-clock load duration.
 
 ## Endpoints
 
@@ -37,12 +71,12 @@ After exercising the JSP and JSF endpoints, inspect /metrics. The endpoint repor
 ## Results
 
 | Metric | JSP | JSF | Notes |
-|---|---:|---:|---|
+| --- | ---: | ---: | --- |
 | Request count | TBD | TBD | Measured run |
-| Average server duration | TBD | TBD | From instrumentation |
-| P95 server duration | TBD | TBD | Derived from raw samples |
-| P99 server duration | TBD | TBD | Derived from raw samples |
-| Max server duration | TBD | TBD | From instrumentation |
+| Average server duration | TBD | TBD | From raw samples |
+| P95 server duration | TBD | TBD | From raw samples |
+| P99 server duration | TBD | TBD | From raw samples |
+| Max server duration | TBD | TBD | From raw samples |
 | Throughput | TBD | TBD | Same runtime/request mix |
 | Error rate | TBD | TBD | Errors / requests |
 
