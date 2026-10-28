@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import math
 import statistics
 import time
 import urllib.error
@@ -58,6 +59,11 @@ def run_load(url: str, requests: int, concurrency: int, timeout: float) -> tuple
         "throughputRequestsPerSecond": requests / wall_seconds,
         "wallSeconds": wall_seconds,
     }
+    status_counts: dict[str, int] = {}
+    for _, _, status in results:
+        key = str(status) if status is not None else "unavailable"
+        status_counts[key] = status_counts.get(key, 0) + 1
+    summary["statusCounts"] = status_counts
     samples = [(latency, status) for latency, _, status in results]
     return summary, samples
 
@@ -75,19 +81,30 @@ def main() -> None:
 
     if min(args.warmup, args.requests, args.concurrency, args.runs) <= 0:
         parser.error("warmup, requests, concurrency, and runs must be positive")
+    if not math.isfinite(args.timeout) or args.timeout <= 0:
+        parser.error("timeout must be a finite positive number")
 
     endpoints = {
         "jsp": args.base_url.rstrip("/") + "/jsp/dashboard.jsp",
         "jsf": args.base_url.rstrip("/") + "/jsf/dashboard.xhtml",
     }
 
+    for implementation, url in endpoints.items():
+        _, available, status = fetch(url, args.timeout)
+        if not available:
+            detail = f"HTTP {status}" if status is not None else "no HTTP response"
+            parser.error(f"{implementation} endpoint is unavailable ({detail}): {url}")
+
     args.output_dir.mkdir(parents=True, exist_ok=True)
     raw_rows: list[dict] = []
     summaries: dict[str, list[dict]] = {}
 
     for implementation, url in endpoints.items():
-        for _ in range(args.warmup):
-            fetch(url, args.timeout)
+        for warmup_number in range(1, args.warmup + 1):
+            _, succeeded, status = fetch(url, args.timeout)
+            if not succeeded:
+                detail = f"HTTP {status}" if status is not None else "no HTTP response"
+                parser.error(f"{implementation} warm-up request {warmup_number} failed ({detail}): {url}")
 
         runs: list[dict] = []
         for run_number in range(1, args.runs + 1):
